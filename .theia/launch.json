@@ -18,6 +18,15 @@
                 "name": "Final_Project",
                 "resourceId": "/Final_Project/timer.c"
             }
+        },
+        {
+            "name": "Final_Project (2)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "Final_Project",
+                "resourceId": "/Final_Project/soil_sensor_main.c"
+            }
         }
     ]
 }

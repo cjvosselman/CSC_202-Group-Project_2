@@ -36,6 +36,8 @@
 #include "timer.h"
 #include "uart.h"
 #include <ti/devices/msp/msp.h>
+#include "adc.h"
+
 
 //-----------------------------------------------------------------------------
 // Define function prototypes used by the program
@@ -52,6 +54,9 @@ void lcd_write_string_window(const char string[], uint8_t start_lcd_addr,
                              uint8_t max_lcd_addr);
 
 void days_since_watered();
+
+void light_read_display();
+void read_display_soil();
 
 //-----------------------------------------------------------------------------
 // Define symbolic constants used by the program
@@ -76,6 +81,15 @@ void days_since_watered();
 
 #define LOAD_VALUE (50000)
 #define COMPARE_VALUE (50000)
+
+#define step_size 450
+#define light_threshold 1800
+#define dark_threshold 1200
+#define optimal_value 1600
+
+#define adc12_max 4096
+#define soil_threshold 2200 // Dry is above | Wet is below
+#define adc_to_tens(adc_val) ((adc_val) * (10 / adc12_max))
 //-----------------------------------------------------------------------------
 // Define global variables and structures here.
 // NOTE: when possible avoid using global variables
@@ -100,6 +114,12 @@ int main(void) {
   timerA_config(LOAD_VALUE, COMPARE_VALUE);
   timerA_enable_interrupt();
   timerA_enable();
+  ADC0_init(ADC12_MEMCTL_VRSEL_VDDA_VSSA);
+  ADC1_init(ADC12_MEMCTL_VRSEL_INTREF_VSSA);
+
+  TIMA0_C0_init();
+  TIMA0_C0_pwm_init(4000, 0);
+  TIMA0_C0_pwm_enable();
 
   // Enable interrupts
   __enable_irq();
@@ -107,7 +127,7 @@ int main(void) {
   config_pb2_interrupt();
 
   // enter your code here
-  days_since_watered();
+  run_monitoring_system();
   // run_monitoring_system();
 
   // Endless loop to prevent program from ending
@@ -238,15 +258,17 @@ void run_monitoring_system() {
 
   while (!done) {
     seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
-    msec_delay(1);
+    msec_delay(5);
     seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
+    msec_delay(5);
+    
     switch (reading) {
     case LIGHT_READING:
-
+      light_read_display();
       break;
 
     case MOISTURE_READING:
-
+      read_display_soil();
       break;
     }
 
@@ -414,3 +436,4 @@ void days_since_watered() {
     msec_delay(5);
   }
 }
+

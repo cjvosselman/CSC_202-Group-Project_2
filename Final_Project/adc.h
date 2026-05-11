@@ -74,6 +74,8 @@
 void ADC0_init(uint32_t reference);
 float thermistor_calc_temperature(int raw_ADC);
 uint32_t ADC0_in(uint8_t channel);
+void ADC1_init(uint32_t reference);
+uint32_t ADC1_in(uint8_t channel);
 
 
 

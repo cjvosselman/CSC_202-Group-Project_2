@@ -1,11 +1,12 @@
 # FIXED
 
-adc.o: ../adc.c ../adc.h ../clock.h \
- C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_adc12.h \
+Light_sensor_main.o: ../Light_sensor_main.c ../LaunchPad.h ../adc.h \
+ ../clock.h ../lcd1602.h ../spi.h ../uart.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/msp.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/DeviceFamily.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/mspm0g350x.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/third_party/CMSIS/Core/Include/core_cm0plus.h \
+ C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_adc12.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_aes.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_comp.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_crc.h \
@@ -31,13 +32,17 @@ adc.o: ../adc.c ../adc.h ../clock.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_debugss.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_sysctl.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h
+../LaunchPad.h:
 ../adc.h:
 ../clock.h:
-C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_adc12.h:
+../lcd1602.h:
+../spi.h:
+../uart.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/msp.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/DeviceFamily.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/m0p/mspm0g350x.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/third_party/CMSIS/Core/Include/core_cm0plus.h:
+C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_adc12.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_aes.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_comp.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/hw_crc.h:

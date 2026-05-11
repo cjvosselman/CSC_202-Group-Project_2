@@ -18,3 +18,9 @@ void timerA_enable(void);
 void timerA_disable(void);
 void timerA_enable_interrupt(void);
 void TIMA0_IRQHandler(void);
+
+
+void TIMA0_C0_init(void);
+void TIMA0_C0_pwm_init(uint32_t load_value, uint32_t compare_value);
+void TIMA0_C0_pwm_enable(void);
+void TIMA0_C0_set_pwm_dc(uint8_t duty_cycle);

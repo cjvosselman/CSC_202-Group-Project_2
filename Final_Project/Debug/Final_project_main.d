@@ -31,7 +31,8 @@ Final_project_main.o: ../Final_project_main.c ../LaunchPad.h ../clock.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_cpuss.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_debugss.h \
  C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_sysctl.h \
- C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h
+ C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h \
+ ../adc.h
 ../LaunchPad.h:
 ../clock.h:
 ../lcd1602.h:
@@ -68,3 +69,4 @@ C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_cpuss.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_debugss.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/hw_sysctl.h:
 C:/ti/mspm0_sdk_2_04_00_06/source/ti/devices/msp/peripherals/m0p/sysctl/hw_sysctl_mspm0g1x0x_g3x0x.h:
+../adc.h:
