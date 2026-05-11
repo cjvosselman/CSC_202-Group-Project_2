@@ -30,14 +30,13 @@
 // Loads MSP launchpad board support macros and definitions
 //-----------------------------------------------------------------------------
 #include "LaunchPad.h"
+#include "adc.h"
 #include "clock.h"
 #include "lcd1602.h"
 #include "spi.h"
 #include "timer.h"
 #include "uart.h"
 #include <ti/devices/msp/msp.h>
-#include "adc.h"
-
 
 //-----------------------------------------------------------------------------
 // Define function prototypes used by the program
@@ -107,6 +106,7 @@ int main(void) {
   // Configure the LaunchPad board
   clock_init_40mhz();
   launchpad_gpio_init();
+  dipsw_init();
   I2C_mstr_init();
   lcd1602_init();
   UART_init(115200);
@@ -261,14 +261,22 @@ void run_monitoring_system() {
     msec_delay(5);
     seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
     msec_delay(5);
-    
+
     switch (reading) {
     case LIGHT_READING:
       light_read_display();
+      seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
+      msec_delay(5);
+      seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
+      msec_delay(5);
       break;
 
     case MOISTURE_READING:
       read_display_soil();
+      seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
+      msec_delay(5);
+      seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
+      msec_delay(5);
       break;
     }
 
@@ -436,4 +444,3 @@ void days_since_watered() {
     msec_delay(5);
   }
 }
-

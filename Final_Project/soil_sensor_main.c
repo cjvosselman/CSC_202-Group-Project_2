@@ -80,7 +80,7 @@ void read_display_soil() {
   uint16_t soil_value = 0;
   uint16_t dry_soil_value = 0;
 
-  lcd_clear();
+  
 
     soil_read = ADC0_in(5);
     soil_value = soil_read;

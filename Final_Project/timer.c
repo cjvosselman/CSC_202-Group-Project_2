@@ -20,61 +20,50 @@ volatile uint8_t tens_seconds = 0;
 
 void timerA_config(uint32_t load_value, uint32_t compare_value) {
 
-  IOMUX->SECCFG.PINCM[IOMUX_PINCM57] =
-      IOMUX_PINCM57_PF_TIMA0_CCP3 | IOMUX_PINCM_PC_CONNECTED;
+  IOMUX->SECCFG.PINCM[IOMUX_PINCM32] =
+      IOMUX_PINCM32_PF_TIMG8_CCP0 | IOMUX_PINCM_PC_CONNECTED;
 
-  // Reset TIMA0
-  TIMA0->GPRCM.RSTCTL =
+  // Reset TIMG8
+  TIMG8->GPRCM.RSTCTL =
       (GPTIMER_RSTCTL_KEY_UNLOCK_W | GPTIMER_RSTCTL_RESETSTKYCLR_CLR |
        GPTIMER_RSTCTL_RESETASSERT_ASSERT);
 
-  // Enable power to TIMA0
-  TIMA0->GPRCM.PWREN =
+  // Enable power to TIMG8
+  TIMG8->GPRCM.PWREN =
       (GPTIMER_PWREN_KEY_UNLOCK_W | GPTIMER_PWREN_ENABLE_ENABLE);
 
   // Wait for 24 bus cycles
   clock_delay(24);
 
   // Selects LFCLK as clock source
-  TIMA0->CLKSEL =
+  TIMG8->CLKSEL =
       (GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE | GPTIMER_CLKSEL_MFCLK_SEL_DISABLE |
        GPTIMER_CLKSEL_LFCLK_SEL_DISABLE);
 
   // Configures Timer Clock
-  TIMA0->CLKDIV = GPTIMER_CLKDIV_RATIO_DIV_BY_8;
+  TIMG8->CLKDIV = GPTIMER_CLKDIV_RATIO_DIV_BY_8;
 
-  TIMA0->COMMONREGS.CPS = GPTIMER_CPS_PCNT_MASK & TIMER_CPS_PCNT;
+  TIMG8->COMMONREGS.CPS = GPTIMER_CPS_PCNT_MASK & TIMER_CPS_PCNT;
 
-  TIMA0->COUNTERREGS.LOAD = GPTIMER_LOAD_LD_MASK & (load_value - 1);
+  TIMG8->COUNTERREGS.LOAD = GPTIMER_LOAD_LD_MASK & (load_value - 1);
 
-  TIMA0->COMMONREGS.CCLKCTL = GPTIMER_CCLKCTL_CLKEN_ENABLED;
+  TIMG8->COMMONREGS.CCLKCTL = GPTIMER_CCLKCTL_CLKEN_ENABLED;
 
-  // Sets TIMA0_C3 as output
-  TIMA0->COMMONREGS.CCPD =
-      (GPTIMER_CCPD_C0CCP3_OUTPUT | GPTIMER_CCPD_C0CCP2_INPUT |
-       GPTIMER_CCPD_C0CCP1_INPUT | GPTIMER_CCPD_C0CCP0_INPUT);
+  // Sets TIMG8_C3 as output
+  TIMG8->COMMONREGS.CCPD =
+      (GPTIMER_CCPD_C0CCP3_INPUT | GPTIMER_CCPD_C0CCP2_INPUT |
+       GPTIMER_CCPD_C0CCP1_INPUT | GPTIMER_CCPD_C0CCP0_OUTPUT);
 
-  TIMA0->CPU_INT.IMASK = 0x00000000;
+  TIMG8->CPU_INT.IMASK = 0x00000000;
 
   // When enabled, timer starts at 0, counts up, and then stops
 
-  TIMA0->COUNTERREGS.CTRCTL =
+  TIMG8->COUNTERREGS.CTRCTL =
       GPTIMER_CTRCTL_CVAE_ZEROVAL | GPTIMER_CTRCTL_CZC_CCCTL2_ZCOND |
       GPTIMER_CTRCTL_REPEAT_REPEAT_1 | GPTIMER_CTRCTL_CM_UP;
 
   // Set timer reload value
-  TIMA0->COUNTERREGS.LOAD = GPTIMER_LOAD_LD_MASK & (load_value - 1);
-
-  // Set timer compare value
-  TIMA0->COUNTERREGS.CC_23[1] = GPTIMER_CC_23_CCVAL_MASK & compare_value;
-
-  // Set compare control for PWM function with output initially low
-  TIMA0->COUNTERREGS.OCTL_23[1] =
-      (GPTIMER_OCTL_23_CCPIV_LOW | GPTIMER_OCTL_23_CCPOINV_NOINV |
-       GPTIMER_OCTL_23_CCPO_ZERO);
-
-  TIMA0->COUNTERREGS.CCCTL_23[1] =
-      GPTIMER_CCCTL_23_COC_COMPARE | GPTIMER_CCCTL_23_CCUPD_IMMEDIATELY;
+  TIMG8->COUNTERREGS.LOAD = GPTIMER_LOAD_LD_MASK & (load_value - 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +80,7 @@ void timerA_config(uint32_t load_value, uint32_t compare_value) {
 //    none
 // -----------------------------------------------------------------------------
 void timerA_enable(void) {
-  TIMA0->COUNTERREGS.CTRCTL |= (GPTIMER_CTRCTL_EN_ENABLED);
+  TIMG8->COUNTERREGS.CTRCTL |= (GPTIMER_CTRCTL_EN_ENABLED);
 } /* timerA_enable */
 //------------------------------------------------------------------------------
 
@@ -109,14 +98,14 @@ void timerA_enable(void) {
 //  none
 // -----------------------------------------------------------------------------
 void timerA_disable(void) {
-  TIMA0->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_EN_ENABLED);
+  TIMG8->COUNTERREGS.CTRCTL &= ~(GPTIMER_CTRCTL_EN_ENABLED);
 } /* timerA_disable */
 
 //-----------------------------------------------------------------------------
 // DESCRIPTION:
-//    This function enables interrupts for Timer A0 by first clearing any
+//    This function enables interrupts for Timer G8 by first clearing any
 //    pending interrupts and then unmasking specific interrupt conditions.
-//    It also sets the priority for the Timer A0 interrupt and enables the
+//    It also sets the priority for the Timer G8 interrupt and enables the
 //    interrupt in the NVIC (Nested Vectored Interrupt Controller).
 //
 //    NOTE: ADJUST INTERRUPTS AS NEEDED
@@ -132,7 +121,7 @@ void timerA_disable(void) {
 //-----------------------------------------------------------------------------
 void timerA_enable_interrupt(void) {
   // Clear all pre-existing interrupts that might be set
-  TIMA0->CPU_INT.ICLR =
+  TIMG8->CPU_INT.ICLR =
       GPTIMER_CPU_INT_ICLR_DC_CLR | GPTIMER_CPU_INT_ICLR_REPC_CLR |
       GPTIMER_CPU_INT_ICLR_TOV_CLR | GPTIMER_CPU_INT_ICLR_F_CLR |
       GPTIMER_CPU_INT_ICLR_CCD0_CLR | GPTIMER_CPU_INT_ICLR_CCD1_CLR |
@@ -144,15 +133,15 @@ void timerA_enable_interrupt(void) {
       GPTIMER_CPU_INT_ICLR_Z_CLR | GPTIMER_CPU_INT_ICLR_L_CLR;
 
   // Unmask conditions to allow interrupt
-  TIMA0->CPU_INT.IMASK = GPTIMER_CPU_INT_IMASK_L_SET;
+  TIMG8->CPU_INT.IMASK = GPTIMER_CPU_INT_IMASK_L_SET;
 
   // Set priority and enable
-  NVIC_SetPriority(TIMA0_INT_IRQn, 2);
-  NVIC_EnableIRQ(TIMA0_INT_IRQn);
+  NVIC_SetPriority(TIMG8_INT_IRQn, 2);
+  NVIC_EnableIRQ(TIMG8_INT_IRQn);
 } /* timerA_enable_interrupt */
 
 // DESCRIPTION:
-//    This is the interrupt handler for Timer A0 (TIMA0). It checks the
+//    This is the interrupt handler for Timer G8 (TIMG8). It checks the
 //    interrupt index register (IIDX) to identify the type of interrupt event
 //    that occurred. Based on the interrupt event, the function processes the
 //    event accordingly:
@@ -174,14 +163,14 @@ void timerA_enable_interrupt(void) {
 // RETURN:
 //     None
 //-----------------------------------------------------------------------------
-void TIMA0_IRQHandler(void) {
+void TIMG8_IRQHandler(void) {
   uint32_t timer_iidx;
   static uint16_t isr_call_count = MAX_ISR_COUNT_DELAY;
 
   
 
   do {
-    timer_iidx = TIMA0->CPU_INT.IIDX;
+    timer_iidx = TIMG8->CPU_INT.IIDX;
     switch (timer_iidx) {
     // Check if overflow event
     case (GPTIMER_CPU_INT_IIDX_STAT_TOV):
@@ -231,7 +220,7 @@ void TIMA0_IRQHandler(void) {
 
   } while (timer_iidx != 0);
 
-} /* TIMA0_IRQHandler */
+} /* TIMG8_IRQHandler */
 
 ///////////////////////////////////////////////////////////////////////////////
 
