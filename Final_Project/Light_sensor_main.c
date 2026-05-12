@@ -39,15 +39,13 @@
 //-----------------------------------------------------------------------------
 // Define function prototypes used by the program
 //-----------------------------------------------------------------------------
+void light_read_display();
 void TIMA0_C0_init(void);
 void TIMA0_C0_pwm_init(uint32_t load_value, uint32_t compare_value);
 void TIMA0_C0_pwm_enable(void);
 void TIMA0_C0_set_pwm_dc(uint8_t duty_cycle);
 uint32_t ADC1_in(uint8_t channel);
 void ADC1_init(uint32_t reference);
-void light_display(uint16_t adc_reading);
-uint16_t light_read();
-void light_correction(uint16_t adc_reading);
 //-----------------------------------------------------------------------------
 // Define symbolic constants used by the program
 //-----------------------------------------------------------------------------
@@ -79,10 +77,7 @@ int main_light(void) {
   TIMA0_C0_pwm_init(4000, 0);
   TIMA0_C0_pwm_enable();
   lcd_clear();
-
-  light_read();
-  light_display(light_read());
-  light_correction(light_read());
+  light_read_display();
 
   leds_off();
 
@@ -91,45 +86,39 @@ int main_light(void) {
     ;
 
 } /* main */
-  
-  uint16_t light_read() {
+
+void light_read_display() {
   bool done = false;
-  uint16_t light_read = 0;
+  uint16_t light_sensor_adc = 0;
+  uint8_t led_max = 6;
+  uint8_t led_idx = 0;
+  uint8_t led_value = 0;
   char adc_text[] = "ADC = ";
   char light_text[] = "Light = ";
   static uint8_t increment = 1;
   uint8_t duty_cycle = 0;
 
-  light_read = ADC1_in(6);
-  return light_read;
-  }
-  
-  void light_display(uint16_t adc_reading)
-  {
-
-  uint16_t light_read = adc_reading;
-  char adc_text[] = "ADC = ";
-  char light_text[] = "Light = ";
-  static uint8_t increment = 1;
-  uint8_t duty_cycle = 0;
+  light_sensor_adc = ADC1_in(6);
+  led_value = (light_sensor_adc / step_size);
+  leds_off();
 
   lcd_set_ddram_addr(LCD_LINE1_ADDR);
   lcd_write_string(adc_text);
   lcd_set_ddram_addr(LCD_LINE1_ADDR + LCD_CHAR_POSITION_8);
-  lcd_write_doublebyte(light_read);
+  lcd_write_doublebyte(light_sensor_adc);
   lcd_set_ddram_addr(LCD_LINE2_ADDR);
   lcd_write_string(light_text);
   lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
 
-  if (light_read > light_threshold) {
+  if (light_sensor_adc > light_threshold) {
     if (duty_cycle >= MIN_DUTY_CYCLE) {
       duty_cycle -= increment;
       TIMA0_C0_set_pwm_dc(duty_cycle);
       TIMA0_C0_pwm_enable();
       msec_delay(200);
-      light_read = ADC1_in(6);
+      light_sensor_adc = ADC1_in(6);
       lcd_set_ddram_addr(LCD_LINE1_ADDR + LCD_CHAR_POSITION_8);
-      lcd_write_doublebyte(light_read);
+      lcd_write_doublebyte(light_sensor_adc);
       lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
       lcd_write_string("             ");
       lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
@@ -137,15 +126,15 @@ int main_light(void) {
     }
   }
 
-  else if (light_read < dark_threshold) {
+  else if (light_sensor_adc < dark_threshold) {
     if (duty_cycle <= MAX_DUTY_CYCLE) {
       duty_cycle += increment;
       TIMA0_C0_set_pwm_dc(duty_cycle);
       TIMA0_C0_pwm_enable();
       msec_delay(200);
-      light_read = ADC1_in(6);
+      light_sensor_adc = ADC1_in(6);
       lcd_set_ddram_addr(LCD_LINE1_ADDR + LCD_CHAR_POSITION_8);
-      lcd_write_doublebyte(light_read);
+      lcd_write_doublebyte(light_sensor_adc);
       lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
       lcd_write_string("             ");
       lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
@@ -155,19 +144,11 @@ int main_light(void) {
     TIMA0_C0_set_pwm_dc(duty_cycle);
     TIMA0_C0_pwm_enable();
     lcd_set_ddram_addr(LCD_LINE2_ADDR + LCD_CHAR_POSITION_9);
+
     lcd_write_string("Perfect");
   }
-}
 
-void light_correction(uint16_t adc_reading)
-{
-  uint8_t led_idx = 0;
-  uint8_t moisture_level = adc_reading; 
-  uint16_t moisture_value = (moisture_level/step_size);
-
-  leds_off();
-
-  for (led_idx = 0; led_idx < moisture_value; led_idx++) {
+  for (led_idx = 0; led_idx < led_value; led_idx++) {
     led_on(led_idx);
   }
 }
