@@ -1,7 +1,7 @@
 //*****************************************************************************
 //*****************************    C Source Code    ***************************
 //*****************************************************************************
-//  DESIGNER NAME:  Casey J Vosselman
+//  DESIGNER NAME:  TBD
 //
 //       LAB NAME:  TBD
 //
@@ -32,96 +32,124 @@
 #include "LaunchPad.h"
 #include "adc.h"
 #include "clock.h"
-#include "lcd1602.h"
+#include "spi.h"
 #include <ti/devices/msp/msp.h>
+#include "lcd1602.h"
 
 //-----------------------------------------------------------------------------
 // Define function prototypes used by the program
 //-----------------------------------------------------------------------------
-uint16_t read_display_soil();
-void average_adc_values();
-uint16_t soil_read();
-void display_soil(uint16_t adc_reading);
-
-
+uint8_t days_since_watered();
+void update_seg7(bool increment);
+void timer_testing();
+void half_sec_delay(void);
 //-----------------------------------------------------------------------------
 // Define symbolic constants used by the program
 //-----------------------------------------------------------------------------
-#define adc12_max 4096
-#define dry_soil_value 2200 // Dry is above | Wet is below
-#define step_size 680
-#define adc_to_tens(adc_val) ((adc_val) * (10 / adc12_max))
-
+#define tick_to_sec(tick_counter) (tick_counter / 10)
 //-----------------------------------------------------------------------------
 // Define global variables and structures here.
 // NOTE: when possible avoid using global variables
 //-----------------------------------------------------------------------------
-
+volatile uint32_t tick_counter = 0;
+/* bool increase_seg7 = false;*/
 // Define a structure to hold different data types
 
-int main_soil(void) {
+
+int main(void) {
   // Configure the LaunchPad board
   clock_init_40mhz();
   launchpad_gpio_init();
+  dipsw_init();
   I2C_mstr_init();
   lcd1602_init();
-  ADC0_init(ADC12_MEMCTL_VRSEL_VDDA_VSSA);
-  leds_init();
-  leds_enable();
-  average_adc_values();
+  seg7_init();
+  sys_tick_init(409600); // set the systick to call every 10.24 seconds
 
-  soil_read();
-  display_soil(soil_read());
-  light_correction(soil_read());
+
+  timer_testing();
+
 
   // Endless loop to prevent program from ending
   while (1)
     ;
 
-} /* main */
+}
 
-uint16_t soil_read()
+void timer_testing() {
+
+  bool done = false;
+  uint8_t day_count = 0;
+  update_seg7(false);
+  while (!done)
+
  {
-  uint16_t soil_read = 0;
-
-  soil_read = ADC0_in(5);
-  dry_soil_value = soil_threshold;
-  return soil_read;
-}
-
-void display_soil(uint16_t adc_reading)
-{
-  uint8_t led_idx = 0;
-  uint8_t moisture_level = adc_reading; 
-  uint16_t moisture_value = (moisture_level/step_size);
-
-  leds_off();
-
-  for (led_idx = 0; led_idx < moisture_value; led_idx++) {
-    led_on(led_idx);
+  update_seg7(increase_seg7);
   }
-  
-   lcd_set_ddram_addr(LCD_LINE1_ADDR);
-
-    if (moisture_level < dry_soil_value) 
-    {
-      lcd_write_string("Status: Soil Wet");
-    } 
-    else if (mositure_level > dry_soil_value) 
-    {
-      lcd_write_string("Status: Soil Dry");
-    }
-
-    lcd_write_string("ADC:");
-
-    lcd_set_ddram_addr(LCD_LINE2_ADDR);
-
-    lcd_write_doublebyte(moisture_level);
 }
 
+void update_seg7 (bool increment)
+{
+static uint8_t ones_dig = 0;
+static uint8_t tens_dig = 0;
+
+if (increment == true)
+{
+  ones_dig++;
+      if (ones_dig > 9)
+    {
+      ones_dig = 0;
+      tens_dig++;
+    }
+  }
+
+seg7_hex(ones_dig, SEG7_DIG3_ENABLE_IDX);
+msec_delay(5);
+seg7_hex(tens_dig, SEG7_DIG2_ENABLE_IDX);
+msec_delay(5);
+}
+
+/*bool days_since_watered()
+{
+  uint8_t sec_count = 0;
+  uint8_t hour_count = 0;
+  uint8_t minute_count = 0;
+  uint8_t day_count = 0;
+  uint32_t current_tick = 0;
+  bool increment = false;
+
+  if (tick_counter == 10)
+  {
+    sec_count++;
+    return increment = true;
+    if (seg7_counter > 9)
+    {
+      seg7_counter = 0;
+    } 
+    if (sec_count == 59) {
+      minute_count++;
+      sec_count = 0;
+      if (minute_count == 59) {
+        hour_count++;
+        minute_count = 0;
+        if (hour_count == 24) {
+          day_count++;
+          hour_count = 0;
+        }
+      }
+    }
+  } 
+}*/
 
 
-void average_adc_values() {
-  ADC0->ULLMEM.MEMCTL[0] = ADC12_MEMCTL_AVGEN_ENABLE;
-  ADC0->ULLMEM.CTL1 = ADC12_CTL1_AVGN_AVG_16 | ADC12_CTL1_AVGD_SHIFT4;
+void SyTick_handler(void)
+{
+uint8_t tick_counter = 0;
+
+tick_counter++;
+lcd_write_byte(tick_counter);
+if (tick_counter < 9)
+{
+ increase_seg7 = true;
+} 
 }
