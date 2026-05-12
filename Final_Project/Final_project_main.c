@@ -257,10 +257,6 @@ void run_monitoring_system() {
   sensor_t reading = LIGHT_READING;
 
   while (!done) {
-    seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
-    msec_delay(5);
-    seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
-    msec_delay(5);
 
     switch (reading) {
     case LIGHT_READING:
@@ -268,7 +264,7 @@ void run_monitoring_system() {
       seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
       msec_delay(5);
       seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
-      msec_delay(5);
+      msec_delay(2);
       break;
 
     case MOISTURE_READING:
@@ -276,7 +272,7 @@ void run_monitoring_system() {
       seg7_hex(ones_seconds, SEG7_DIG3_ENABLE_IDX);
       msec_delay(5);
       seg7_hex(tens_seconds, SEG7_DIG2_ENABLE_IDX);
-      msec_delay(5);
+      msec_delay(2);
       break;
     }
 

@@ -100,7 +100,6 @@ void light_read_display() {
 
   light_sensor_adc = ADC1_in(6);
   led_value = (light_sensor_adc / step_size);
-  leds_off();
 
   lcd_set_ddram_addr(LCD_LINE1_ADDR);
   lcd_write_string(adc_text);
@@ -148,7 +147,7 @@ void light_read_display() {
     lcd_write_string("Perfect");
   }
 
-  for (led_idx = 0; led_idx < led_value; led_idx++) {
-    led_on(led_idx);
-  }
+  //for (led_idx = 0; led_idx < led_value; led_idx++) {
+    //led_on(led_idx);
+  //}
 }

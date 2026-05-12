@@ -41,7 +41,7 @@ void timerA_config(uint32_t load_value, uint32_t compare_value) {
        GPTIMER_CLKSEL_LFCLK_SEL_DISABLE);
 
   // Configures Timer Clock
-  TIMG8->CLKDIV = GPTIMER_CLKDIV_RATIO_DIV_BY_8;
+  TIMG8->CLKDIV = GPTIMER_CLKDIV_RATIO_DIV_BY_4;
 
   TIMG8->COMMONREGS.CPS = GPTIMER_CPS_PCNT_MASK & TIMER_CPS_PCNT;
 
